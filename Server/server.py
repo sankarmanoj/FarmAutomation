@@ -1,3 +1,4 @@
+from time import sleep
 import socket
 from threading import Thread
 import json
@@ -8,9 +9,8 @@ server_socket.bind(("",3212))
 server_socket.listen(10)
 
 clients = []
-
-sensor_status = {}
-control_status = {}
+sensor_status = json.load(open("sensors.json","r"))
+control_status =  json.load(open("controls.json","r"))
 def getSensorStatus(in_string):
     global sensor_status
     print sensor_status
@@ -20,18 +20,15 @@ def getSensorStatus(in_string):
         print e
         return
 
-
+    control_echo = {}
     for val in values.keys():
-        sensor_status[val] = values[val]
-    print sensor_status
+        if val in sensor_status:
+            sensor_status[val] = values[val]
+        if "control" in val:
+            control_echo[val] = values[val]
+    print "Got from client",control_echo
+    json.dump(sensor_status,open("sensors.json","w"))
 
-def setControlStatus():
-    global sensor_status
-    global control_status
-    global clients
-    # if "sensor-water-level-1" in sensor_status and sensor_status["sensor-water-level-1"] > 10:
-    for client in clients:
-        client.send_data(control_status)
 
 
 
@@ -46,7 +43,12 @@ class ClientHandler(Thread):
     def run(self):
         data = ""
         while True:
-            char_in = self.client.recv(1)
+            try:
+                char_in = self.client.recv(1)
+            except socket.error as err:
+                print err
+                clients.remove(self)
+                break
             if not char_in:
                 print "Closing connection with client",self.addr
                 break
@@ -58,14 +60,28 @@ class ClientHandler(Thread):
             # print "Received data from ",self.addr
             # print data
             # setSensorStatus(data)
-    def send_data(data):
+    def send_data(self,data):
         data_string = json.dumps(data)
         self.client.send(data_string)
         self.client.send("~")
 
-
+class ServerHandler(Thread):
+    def __init__(self,):
+        super(ServerHandler,self).__init__()
+        self.setDaemon(True)
+    def run(self):
+        while True:
+            client,client_addr = server_socket.accept()
+            clients_handler = ClientHandler(client,client_addr)
+            clients.append(clients_handler)
+            clients_handler.start()
+server = ServerHandler()
+server.start()
 while True:
-    client,client_addr = server_socket.accept()
-    clients_handler = ClientHandler(client,client_addr)
-    clients.append(clients_handler)
-    clients_handler.start()
+    sensor_status = json.load(open("sensors.json","r"))
+    control_status =  json.load(open("controls.json","r"))
+    # print "On Server ",sensor_status
+    # print "On Server ",control_status
+    for client in clients:
+        client.send_data(control_status)
+    sleep(1)

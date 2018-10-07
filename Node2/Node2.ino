@@ -12,9 +12,12 @@ UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses
 boolean pumpStatus = false;
 WiFiClient wClient;
 
-StaticJsonBuffer<1000> jsonBuffer;
+StaticJsonBuffer<1000> jsonOutputBuffer;
+StaticJsonBuffer<1000> jsonInputBuffer;
 
-String ServerIP = "192.168.0.161";
+
+String ServerIP = "192.168.0.225";
+String inputBuffer;
 int ServerPort = 3212;
 void setup () {
     Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
@@ -71,24 +74,11 @@ int second = 0;
 void loop () {
     ArduinoOTA.handle();
 
-    JsonObject &root = jsonBuffer.createObject();
+    JsonObject &root = jsonOutputBuffer.createObject();
     // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
-    int distance = (distanceSensor.measureDistanceCm());
-    Serial.print("Distance is ");
-    Serial.println(distance);
-    root["sensor-water-level-1"] = distance;
-    root["control-pump-1"] = int(pumpStatus);
+    root["control-pump-2"] = int(pumpStatus);
 
-    Serial.print(" Pump is ");
-    if(pumpStatus)
-    {
-      Serial.println("ON");
-    }
-    else
-    {
-      Serial.println("OFF");
-
-    }
+    Serial.println("PumpStatus = "+ String(pumpStatus));
     if(pumpStatus)
     {
       digitalWrite(D2,HIGH);
@@ -103,7 +93,28 @@ void loop () {
    while(wClient.available())
    {
     char c = wClient.read();
-    Serial.print(c);
+    if(c=='~')
+    {
+      Serial.println(inputBuffer);
+      JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
+      if(input_json.success())
+      {
+      input_json.prettyPrintTo(Serial);
+      pumpStatus = input_json["control-pump-2"];
+      Serial.println("Updating Pump Status to "+String(pumpStatus));
+      }
+      else
+      {
+        Serial.println("Unable to parse json");
+      }
+      inputBuffer = "";
+      jsonInputBuffer.clear();
+    }
+    else
+    {
+      inputBuffer += c;
+    }
+
    }
    if(!wClient.connected())
    {
@@ -119,5 +130,5 @@ void loop () {
      wClient.print("~");
    }
     second++;
-    jsonBuffer.clear();
+    jsonOutputBuffer.clear();
 }
