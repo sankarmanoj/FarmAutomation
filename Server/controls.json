@@ -1,1 +1,6 @@
-{"control-pump-2": 1, "control-pump-1": 2, "control-valve-1": 1}
+{
+    "control-valve-raft-tank-1": 0, 
+    "control-valve-raft-tank-2": 0, 
+    "control-pump-circulation": 0, 
+    "control-pump-main-tank": 0
+}

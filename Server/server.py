@@ -27,7 +27,7 @@ def getSensorStatus(in_string):
         if "control" in val:
             control_echo[val] = values[val]
     print "Got from client",control_echo
-    json.dump(sensor_status,open("sensors.json","w"))
+    json.dump(sensor_status,open("sensors.json","w"),indent = 4)
 
 
 
