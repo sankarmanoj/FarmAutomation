@@ -78,16 +78,16 @@ void loop () {
     // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
     int distance = (distanceSensor.measureDistanceCm());
     root["sensor-water-level-1"] = distance;
-    root["control-pump-1"] = int(pumpStatus);
+    root["control-valve-raft-tank-1"] = int(pumpStatus);
 
     Serial.println("PumpStatus = "+ String(pumpStatus));
     if(pumpStatus)
     {
-      digitalWrite(D2,HIGH);
+      digitalWrite(D2,LOW);
     }
     else
     {
-      digitalWrite(D2,LOW);
+      digitalWrite(D2,HIGH);
     }
 
 
