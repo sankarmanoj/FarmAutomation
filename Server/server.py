@@ -53,6 +53,7 @@ class ClientHandler(Thread):
                 print "Closing connection with client",self.addr
                 break
             if "~" in char_in:
+                print data
                 getSensorStatus(data)
                 data = ""
             else:

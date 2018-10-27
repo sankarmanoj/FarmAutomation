@@ -24,7 +24,7 @@ StaticJsonBuffer<1000> jsonOutputBuffer;
 StaticJsonBuffer<1000> jsonInputBuffer;
 
 
-String ServerIP = "192.168.0.114";
+String ServerIP = "192.168.0.88";
 String inputBuffer;
 int ServerPort = 3212;
 void setup () {
@@ -111,7 +111,7 @@ void loop () {
       if(input_json.success())
       {
       input_json.prettyPrintTo(Serial);
-      pumpStatus = input_json["control-pump-2"];
+      pumpStatus = input_json["control-valve-raft-tank-2"];
       Serial.println("Updating Pump Status to "+String(pumpStatus));
       }
       else
