@@ -79,13 +79,16 @@ class ServerHandler(Thread):
 server = ServerHandler()
 server.start()
 while True:
-    sensor_status = json.load(open("sensors.json","r"))
-    control_status =  json.load(open("controls.json","r"))
-    # print "On Server ",sensor_status
-    # print "On Server ",control_status
-    for client in clients:
-        try:
-            client.send_data(control_status)
-        except:
-            clients.remove(client)
-    sleep(1)
+    try:
+        sensor_status = json.load(open("sensors.json","r"))
+        control_status =  json.load(open("controls.json","r"))
+        # print "On Server ",sensor_status
+        # print "On Server ",control_status
+        for client in clients:
+            try:
+                client.send_data(control_status)
+            except:
+                clients.remove(client)
+        sleep(1)
+    except Exception as e:
+        print e
