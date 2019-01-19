@@ -84,5 +84,8 @@ while True:
     # print "On Server ",sensor_status
     # print "On Server ",control_status
     for client in clients:
-        client.send_data(control_status)
+        try:
+            client.send_data(control_status)
+        except:
+            clients.remove(client)
     sleep(1)

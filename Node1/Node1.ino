@@ -13,8 +13,8 @@ OneWire oneWire(ONE_WIRE_BUS);
 
 DallasTemperature sensors(&oneWire);
 
-const char* ssid = "Striker";
-const char* password = "giveme500bucks";
+const char* ssid = "JioFarm";
+const char* password = "farmtheland";
 
 UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;

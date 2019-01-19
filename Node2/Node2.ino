@@ -13,8 +13,8 @@ OneWire oneWire(ONE_WIRE_BUS);
 
 DallasTemperature sensors(&oneWire);
 
-const char* ssid = "Striker";
-const char* password = "giveme500bucks";
+const char* ssid = "JioFarm";
+const char* password = "farmtheland";
 
 UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;
@@ -28,18 +28,18 @@ String ServerIP = "192.168.0.88";
 String inputBuffer;
 int ServerPort = 3212;
 void setup () {
-    Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
-    pinMode(D0,OUTPUT);
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-    WiFi.setAutoConnect(true);
-    WiFi.setAutoReconnect(true);
-    ArduinoOTA.setHostname("board1");
-    ArduinoOTA.setPassword("thisboardofmine");
+  Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
+  pinMode(D0,OUTPUT);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  WiFi.setAutoConnect(true);
+  WiFi.setAutoReconnect(true);
+  ArduinoOTA.setHostname("board2");
+  ArduinoOTA.setPassword("thisboardofmine");
 
-    sensors.begin();
+  sensors.begin();
 
-    ArduinoOTA.onStart([]() {
+  ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
@@ -81,28 +81,34 @@ void setup () {
 int second = 0;
 float temperature_value;
 void loop () {
-    ArduinoOTA.handle();
+  ArduinoOTA.handle();
 
-    JsonObject &root = jsonOutputBuffer.createObject();
-    // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
-    root["control-valve-raft-tank-2"] = int(pumpStatus);
-    sensors.requestTemperatures();
-    temperature_value=sensors.getTempCByIndex(0);
-    Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
-    root["sensor-temperature-1"]=temperature_value;
-    if(pumpStatus)
-    {
-      digitalWrite(D0,LOW);
-    }
-    else
-    {
-      digitalWrite(D0,HIGH);
-    }
+  JsonObject &root = jsonOutputBuffer.createObject();
+  // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
+
+  root["control-valve-raft-tank-2"] = int(pumpStatus);
+  // sensors.requestTemperatures();
+  // temperature_value=sensors.getTempCByIndex(0);
+  Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
+  // root["sensor-temperature-1"]=temperature_value;
 
 
-   delay(1000);
-   while(wClient.available())
-   {
+  int distance = (distanceSensor.measureDistanceCm());
+  root["sensor-water-level-main-tank-2"] = int(distance);
+
+  if(pumpStatus)
+  {
+    digitalWrite(D0,LOW);
+  }
+  else
+  {
+    digitalWrite(D0,HIGH);
+  }
+
+
+  delay(1000);
+  while(wClient.available())
+  {
     char c = wClient.read();
     if(c=='~')
     {
@@ -110,9 +116,9 @@ void loop () {
       JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
       if(input_json.success())
       {
-      input_json.prettyPrintTo(Serial);
-      pumpStatus = input_json["control-valve-raft-tank-2"];
-      Serial.println("Updating Pump Status to "+String(pumpStatus));
+        input_json.prettyPrintTo(Serial);
+        pumpStatus = input_json["control-valve-raft-tank-2"];
+        Serial.println("Updating Pump Status to "+String(pumpStatus));
       }
       else
       {
@@ -126,20 +132,21 @@ void loop () {
       inputBuffer += c;
     }
 
-   }
-   if(!wClient.connected())
-   {
-     if (! wClient.connect(ServerIP,ServerPort))
-     {
+  }
+  if(!wClient.connected())
+  {
+    if (! wClient.connect(ServerIP,ServerPort))
+    {
       Serial.println("connection failed to "+ServerIP);
-     }
-     delay(1000);
-   }
-   else
-   {
-     root.printTo(wClient);
-     wClient.print("~");
-   }
-    second++;
-    jsonOutputBuffer.clear();
+    }
+    delay(1000);
+  }
+  else
+  {
+    root.printTo(wClient);
+    wClient.print("~");
+  }
+
+  second++;
+  jsonOutputBuffer.clear();
 }
