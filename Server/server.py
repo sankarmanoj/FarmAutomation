@@ -9,7 +9,13 @@ server_socket.bind(("",3212))
 server_socket.listen(10)
 
 clients = []
-sensor_status = json.load(open("sensors.json","r"))
+sensor_status = {
+    "sensor-water-level-main-tank-2": 0, 
+    "sensor-water-level-main-tank-1": 0,
+    "sensor-water-level-buffer-tank-2": 0,
+    "sensor-temperature-1": 0,
+    "sensor-water-level-buffer-tank-1": 0
+}
 control_status =  json.load(open("controls.json","r"))
 def getSensorStatus(in_string):
     global sensor_status
@@ -92,3 +98,4 @@ while True:
         sleep(1)
     except Exception as e:
         print e
+
