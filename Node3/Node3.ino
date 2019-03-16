@@ -8,7 +8,7 @@
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses digital pins 13 and 12.
+UltraSonicDistanceSensor distanceSensor(D1, D2);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;
 
 
@@ -16,6 +16,11 @@ WiFiClient wClient;
 
 StaticJsonBuffer<1000> jsonOutputBuffer;
 StaticJsonBuffer<1000> jsonInputBuffer;
+
+String ServerIP = "192.168.225.200";
+String inputBuffer;
+int ServerPort = 3212;
+
 
 void setup () {
   Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
@@ -107,7 +112,6 @@ void loop () {
 
   delay(1000);
   second++;
-  air_second++;
   while(wClient.available())
   {
     char c = wClient.read();
