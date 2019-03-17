@@ -30,9 +30,22 @@ class ClientHandler(Thread):
             try:
                 json_data = json.loads(data)
                 print json_data
+                write_back = False
+                control_status =  json.load(open("controls.json","r"))
                 if "control-pump-main-tank" in json_data:
-                    control_status =  json.load(open("controls.json","r"))
                     control_status["control-pump-main-tank"]=json_data["control-pump-main-tank"]
+                    write_back = True
+
+
+                if "control-valve-raft-tank-1" in json_data:
+                    control_status["control-valve-raft-tank-1"]=json_data["control-valve-raft-tank-1"]
+                    write_back = True
+
+                if "control-valve-raft-tank-2" in json_data:
+                    control_status["control-valve-raft-tank-2"]=json_data["control-valve-raft-tank-2"]
+                    write_back = True
+
+                if write_back:
                     with open("controls.json","w") as fp:
                         json.dump(control_status,fp,indent = 4)
 
