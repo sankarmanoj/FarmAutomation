@@ -4,19 +4,12 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
 
-#define ONE_WIRE_BUS D5
-
-OneWire oneWire(ONE_WIRE_BUS);
-
-DallasTemperature sensors(&oneWire);
 
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses digital pins 13 and 12.
+UltraSonicDistanceSensor distanceSensor(D2, D1);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;
 WiFiClient wClient;
 
@@ -24,11 +17,10 @@ StaticJsonBuffer<1000> jsonOutputBuffer;
 StaticJsonBuffer<1000> jsonInputBuffer;
 
 
-String ServerIP = "192.168.0.88";
+String ServerIP = "192.168.225.200";
 String inputBuffer;
 int ServerPort = 3212;
 void setup () {
-    Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
     pinMode(D0,OUTPUT);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -70,6 +62,8 @@ void setup () {
       Serial.println("End Failed");
     }
   });
+  Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
+  
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
@@ -86,10 +80,8 @@ void loop () {
     JsonObject &root = jsonOutputBuffer.createObject();
     // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
     root["control-valve-raft-tank-1"] = int(pumpStatus);
-    sensors.requestTemperatures();
-    temperature_value=sensors.getTempCByIndex(0);
-    Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
-    root["sensor-temperature-1"]=temperature_value;
+    int distance = (distanceSensor.measureDistanceCm());
+    root["sensor-water-level-buffer-tank-1"] = int(distance);
     if(pumpStatus)
     {
       digitalWrite(D0,LOW);

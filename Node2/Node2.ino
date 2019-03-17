@@ -4,19 +4,12 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
 
-#define ONE_WIRE_BUS D5
-
-OneWire oneWire(ONE_WIRE_BUS);
-
-DallasTemperature sensors(&oneWire);
 
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D0, D1);  // Initialize sensor that uses digital pins 13 and 12.
+UltraSonicDistanceSensor distanceSensor(D1, D2);  
 boolean pumpStatus = false;
 WiFiClient wClient;
 
@@ -24,7 +17,7 @@ StaticJsonBuffer<1000> jsonOutputBuffer;
 StaticJsonBuffer<1000> jsonInputBuffer;
 
 
-String ServerIP = "192.168.0.88";
+String ServerIP = "192.168.225.200";
 String inputBuffer;
 int ServerPort = 3212;
 void setup () {
@@ -37,7 +30,7 @@ void setup () {
   ArduinoOTA.setHostname("board2");
   ArduinoOTA.setPassword("thisboardofmine");
 
-  sensors.begin();
+
 
   ArduinoOTA.onStart([]() {
     String type;
@@ -88,14 +81,15 @@ void loop () {
 
   root["control-valve-raft-tank-2"] = int(pumpStatus);
   // sensors.requestTemperatures();
-  // temperature_value=sensors.getTempCByIndex(0);
-  Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
+
+//  Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
   // root["sensor-temperature-1"]=temperature_value;
 
-
-  int distance = (distanceSensor.measureDistanceCm());
-  root["sensor-water-level-main-tank-2"] = int(distance);
-
+  delay(50);
+  double distance = (distanceSensor.measureDistanceCm());
+  root["sensor-water-level-buffer-tank-2"] = int(distance);
+  Serial.print(" Distance to water is ");
+  Serial.println(distance);
   if(pumpStatus)
   {
     digitalWrite(D0,LOW);
@@ -106,19 +100,19 @@ void loop () {
   }
 
 
-  delay(1000);
+  delay(950);
   while(wClient.available())
   {
     char c = wClient.read();
     if(c=='~')
     {
-      Serial.println(inputBuffer);
+      //Serial.println(inputBuffer);
       JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
       if(input_json.success())
       {
-        input_json.prettyPrintTo(Serial);
+//        input_json.prettyPrintTo(Serial);
         pumpStatus = input_json["control-valve-raft-tank-2"];
-        Serial.println("Updating Pump Status to "+String(pumpStatus));
+//        Serial.println("Updating Pump Status to "+String(pumpStatus));
       }
       else
       {
