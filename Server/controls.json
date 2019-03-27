@@ -1,7 +1,8 @@
 {
     "control-valve-raft-tank-1": 0, 
-    "control-pump-2": 0, 
     "control-valve-raft-tank-2": 0, 
     "control-pump-circulation": 0, 
-    "control-pump-main-tank": 1
+    "control-blower": 0, 
+    "control-pump-main-tank": 1, 
+    "control-pump-2": 0
 }
