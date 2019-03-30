@@ -78,14 +78,12 @@ void loop () {
 
   ArduinoOTA.handle();
   // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
-  int distance = (distanceSensor.measureDistanceCm());
-  Serial.print(distance);
+
   Serial.print(" Pump is ");
 
 
   JsonObject &root = jsonOutputBuffer.createObject();
   root["control-pump-main-tank"] = int(pumpStatus);
-  root["sensor-water-level-main-tank-1"] = int(distance);
 
 
   if(pumpStatus)
@@ -110,8 +108,7 @@ void loop () {
 
 
 
-  delay(1000);
-  second++;
+  delay(10);
   while(wClient.available())
   {
     char c = wClient.read();

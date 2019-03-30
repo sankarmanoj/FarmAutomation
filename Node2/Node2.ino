@@ -1,4 +1,4 @@
-#include <HCSR04.h>
+  #include <HCSR04.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
@@ -86,7 +86,7 @@ void loop () {
   // root["sensor-temperature-1"]=temperature_value;
 
   delay(50);
-  double distance = (distanceSensor.measureDistanceCm());
+  double distance = 76 - (distanceSensor.measureDistanceCm());
   root["sensor-water-level-buffer-tank-2"] = int(distance);
   Serial.print(" Distance to water is ");
   Serial.println(distance);
