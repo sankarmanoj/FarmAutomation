@@ -19,7 +19,7 @@ sensor_status = {
 control_status =  json.load(open("controls.json","r"))
 def getSensorStatus(in_string):
     global sensor_status
-    print sensor_status
+    #print sensor_status
     try:
         values = json.loads(in_string)
     except ValueError as e:
@@ -27,12 +27,14 @@ def getSensorStatus(in_string):
         return
 
     control_echo = {}
+    sensor_echo = {}	
     for val in values.keys():
         if val in sensor_status:
             sensor_status[val] = values[val]
-        if "control" in val:
+            sensor_echo[val] = values[val]
+	if "control" in val:
             control_echo[val] = values[val]
-    print "Got from client",control_echo
+    print "Got from client",control_echo,sensor_echo
     json.dump(sensor_status,open("sensors.json","w"),indent = 4)
 
 
@@ -59,7 +61,7 @@ class ClientHandler(Thread):
                 print "Closing connection with client",self.addr
                 break
             if "~" in char_in:
-                print data
+                print self.addr,
                 getSensorStatus(data)
                 data = ""
             else:
