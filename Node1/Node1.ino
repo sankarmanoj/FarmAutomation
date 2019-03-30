@@ -9,7 +9,7 @@
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D2, D1);  // Initialize sensor that uses digital pins 13 and 12.
+UltraSonicDistanceSensor distanceSensor(D1, D2);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;
 WiFiClient wClient;
 
@@ -29,7 +29,6 @@ void setup () {
     ArduinoOTA.setHostname("board1");
     ArduinoOTA.setPassword("thisboardofmine");
 
-    sensors.begin();
 
     ArduinoOTA.onStart([]() {
     String type;
@@ -80,7 +79,7 @@ void loop () {
     JsonObject &root = jsonOutputBuffer.createObject();
     // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
     root["control-valve-raft-tank-1"] = int(pumpStatus);
-    int distance = (distanceSensor.measureDistanceCm());
+    int distance = 80 - (distanceSensor.measureDistanceCm());
     root["sensor-water-level-buffer-tank-1"] = int(distance);
     if(pumpStatus)
     {
