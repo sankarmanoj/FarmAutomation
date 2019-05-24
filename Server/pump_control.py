@@ -175,7 +175,7 @@ while True:
         if pump_enable and pump_mode=="Level":
             with open("sensors.json","r") as fp:
                 sensors = json.load(fp)
-            if pump_status == 0 and get_water_level(sensors,'max')<configuration["water-level-buffer-tank-minimum"]:
+            if pump_status == 0 and get_water_level(sensors,'min')<configuration["water-level-buffer-tank-minimum"]:
                 timer_close_valves= Timer(1,close_valves)
                 timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
                 timer_on_pump.start()
