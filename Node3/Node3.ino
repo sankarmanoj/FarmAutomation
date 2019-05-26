@@ -4,14 +4,16 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+
+#include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D1, D2);  // Initialize sensor that uses digital pins 13 and 12.
 boolean pumpStatus = false;
 
 
+ESP8266WiFiMulti WiFiMulti;
 WiFiClient wClient;
 
 StaticJsonBuffer<1000> jsonOutputBuffer;
@@ -24,9 +26,10 @@ int ServerPort = 3212;
 
 void setup () {
   Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
-  pinMode(D2,OUTPUT);
+  pinMode(D0,OUTPUT);
   pinMode(D7,OUTPUT);
   WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP(ssid, password);
   WiFi.begin(ssid, password);
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
@@ -67,6 +70,10 @@ void setup () {
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
+  while (WiFiMulti.run() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
   Serial.println(WiFi.localIP());
   wClient.connect(ServerIP,ServerPort);
 
@@ -97,18 +104,18 @@ void loop () {
 
   if(pumpStatus)
   {
-    digitalWrite(D2,HIGH);
+    digitalWrite(D0,HIGH);
   }
   else
   {
-    digitalWrite(D2,LOW);
+    digitalWrite(D0,LOW);
   }
 
 
 
 
 
-  delay(10);
+  delay(100);
   while(wClient.available())
   {
     char c = wClient.read();

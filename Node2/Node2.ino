@@ -25,6 +25,9 @@ void setup () {
   pinMode(D0,OUTPUT);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+//  IPAddress ip(192,168,225,102);   
+//  IPAddress gateway(192,168,225,1);   
+//  IPAddress subnet(255,255,255,0);  
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
   ArduinoOTA.setHostname("board2");
@@ -100,7 +103,7 @@ void loop () {
   }
 
 
-  delay(950);
+  delay(150);
   while(wClient.available())
   {
     char c = wClient.read();
