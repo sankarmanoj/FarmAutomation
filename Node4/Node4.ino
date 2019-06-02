@@ -111,6 +111,7 @@ void loop () {
     digitalWrite(D0,LOW);
   }
 
+  delay(100);
 
   while(wClient.available())
   {
