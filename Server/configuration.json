@@ -6,5 +6,6 @@
     "time-off-pump-main-tank" : 900,
     "time-valve-water-hold" : 10,
     "time-valve-water-drain" : 3,
-    "tank-select-water-level" : 0
+    "tank-select-water-level" : 0,
+    "hold-time-night-multiplier" : 3,
 }

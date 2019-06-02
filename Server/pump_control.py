@@ -2,6 +2,7 @@ import traceback
 import json
 from time import sleep
 from threading import Timer
+import pytz
 import datetime
 pump_enable  = True                       #
 pump_mode = "Level"
@@ -10,9 +11,17 @@ pump_status = 0
 
 blower_status = 0
 blower_enable = False
-blower_on_delay = 1
-blower_off_delay = 1
+blower_on_delay = 5
+blower_off_delay = 30
 
+
+def is_night():
+    ist = pytz.timezone("Asia/Kolkata")
+    x = datetime.datetime.now().replace(tzinfo = ist)
+    if x.hour<=8 or x.hour>=16:
+        return True:
+    else:
+        return False
 def safe_json_read(path):
     while True:
         try:
@@ -65,8 +74,7 @@ def pump_on(timer=None):                  # what does timer =None mean??
     pump_enable = True
     pump_status = 1
 
-    with open("controls.json","r") as fp: # open Jason file in read mode
-        controls = json.load(fp)          # read Jason file contents to  'cont
+    controls = safe_json_read("controls.json")        # read Jason file contents to  'cont
 
     print "Pump On"
     controls['control-pump-main-tank'] = 1 # Set Pump
@@ -196,6 +204,9 @@ while True:
         pump_off_time = configuration["time-off-pump-main-tank"]
         water_hold_time = configuration["time-valve-water-hold"]
         water_drain_time = configuration["time-valve-water-drain"]
+
+        if is_night():
+            water_hold_time = configuration["hold-time-night-multiplier"]*water_hold_time
 
         now = datetime.datetime.now()
 
