@@ -1,20 +1,26 @@
 import traceback
 import json
-from time import sleep
+from time import sleep,time
 from threading import Timer
 import pytz
 import datetime
+
+start_time = time()
+
 pump_enable  = True                       #
-pump_mode = "Level"
+time_pump_enable = True
+pump_mode = "Time"
 pump_status = 0
 
 
 blower_status = 0
 blower_enable = False
 blower_on_delay = 5
-blower_off_delay = 30
+blower_off_delay = 600
 
 
+def print_time():
+    return  " Time = "+str(int(time()-start_time))
 def is_night():
     ist = pytz.timezone("Asia/Kolkata")
     x = datetime.datetime.now().replace(tzinfo = ist)
@@ -43,7 +49,7 @@ def blower_on(timer=None):
     blower_status = 1
     controls = safe_json_read("controls.json")
 
-    print "Blower On"
+    print "Blower On",print_time()
     controls['control-blower'] = 1
 
     with open("controls.json","w") as fp:
@@ -58,7 +64,7 @@ def blower_off(timer=None):
     blower_status = 0
     controls = safe_json_read("controls.json")
 
-    print "Blower Off"
+    print "Blower Off",print_time()
     controls['control-blower'] = 0
 
     with open("controls.json","w") as fp:
@@ -76,7 +82,7 @@ def pump_on(timer=None):                  # what does timer =None mean??
 
     controls = safe_json_read("controls.json")        # read Jason file contents to  'cont
 
-    print "Pump On"
+    print "Pump On",print_time()
     controls['control-pump-main-tank'] = 1 # Set Pump
 
     with open("controls.json","w") as fp:  # open Jasone file in write mode
@@ -92,7 +98,7 @@ def pump_off(timer=None):
     pump_status = 0                       # WHAT IS THIS? is it needed to clear pump_enable? if not, why was that needed in 'pump_on?
     controls = safe_json_read("controls.json")
 
-    print "Pump Off"
+    print "Pump Off",print_time()
     controls['control-pump-main-tank'] = 0
 
     with open("controls.json","w") as fp:
@@ -109,7 +115,7 @@ def close_valves():
 
     controls = safe_json_read("controls.json")
 
-    print "Valves Closed"
+    print "Valves Closed",print_time()
     controls["control-valve-raft-tank-1"] = 1
     controls["control-valve-raft-tank-2"] = 1
 
@@ -120,7 +126,7 @@ def open_valves():
 
     controls = safe_json_read("controls.json")
 
-    print "Valves Opened"
+    print "Valves Opened",print_time()
     controls["control-valve-raft-tank-1"] = 0
     controls["control-valve-raft-tank-2"] = 0
 
@@ -130,6 +136,10 @@ def open_valves():
 def enable_pump():
     global pump_enable
     pump_enable = True
+
+def set_time_pump_enable():
+    global time_pump_enable
+    time_pump_enable = True
 
 tank_1_levels = []
 tank_2_levels = []
@@ -172,7 +182,8 @@ def get_water_level(sensors,mode = "avg"):
         raise RuntimeError("Unknown mode for get water level")
 
 if pump_mode == "Time":                          # WHAT IS THIS?? is this start of main code??
-    pump_on()
+    pump_off()
+    open_valves()
 elif pump_mode == "Level":
     pump_off()                                   # so, for the first time, pump_enable is not set!! is tha ok?
     open_valves()
@@ -210,11 +221,23 @@ while True:
 
         now = datetime.datetime.now()
 
-        if pump_enable and pump_mode=="Time":           # when is the first time pump_enable is set?? esp. in Level mode??
+        if time_pump_enable and pump_mode=="Time":           # when is the first time time_pump_enable is set?? esp. in Level mode??
             timer_on = Timer(pump_off_time,pump_on)
-            timer_off = Timer(pump_on_time,pump_off,[timer_on,])
+            timer_on.start()
+
+            timer_close = Timer(pump_off_time + 5,close_valves)
+            timer_close.start()
+
+            timer_off = Timer(pump_off_time + pump_on_time,pump_off)
             timer_off.start()
-            pump_enable = False
+
+            timer_open = Timer(pump_off_time + pump_on_time + water_hold_time,open_valves)
+            timer_open.start()
+
+            timer_enable = Timer(pump_off_time + pump_on_time + water_hold_time,set_time_pump_enable)
+            timer_enable.start()
+
+            time_pump_enable = False
 
 
         # blower_on_time = 4

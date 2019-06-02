@@ -2,10 +2,10 @@
     "water-level-main-tank-maximum": 100,
     "water-level-buffer-tank-minimum": 13,
     "water-level-buffer-tank-maximum": 37,
-    "time-on-pump-main-tank" : 300,
-    "time-off-pump-main-tank" : 900,
-    "time-valve-water-hold" : 10,
-    "time-valve-water-drain" : 3,
+    "time-on-pump-main-tank" : 900,
+    "time-off-pump-main-tank" : 900 ,
+    "time-valve-water-hold" : 1800,
+    "time-valve-water-drain" : 900,
     "tank-select-water-level" : 0,
     "hold-time-night-multiplier" : 3
 }
