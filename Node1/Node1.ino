@@ -62,7 +62,7 @@ void setup () {
     }
   });
   Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
-  
+
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
@@ -80,7 +80,12 @@ void loop () {
     // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
     root["control-valve-raft-tank-1"] = int(pumpStatus);
     int distance = 80 - (distanceSensor.measureDistanceCm());
-    root["sensor-water-level-buffer-tank-1"] = int(distance);
+
+    if(distance < 80)
+    {
+      root["sensor-water-level-buffer-tank-1"] = int(distance);
+    }
+
     if(pumpStatus)
     {
       digitalWrite(D0,LOW);
