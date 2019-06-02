@@ -1,8 +1,14 @@
+<<<<<<< HEAD
   #include <HCSR04.h>
+=======
+#include <HCSR04.h>
+#include <HCSR04.h>
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+<<<<<<< HEAD
 #include <ArduinoJson.h>
 
 
@@ -11,11 +17,24 @@ const char* password = "farmtheland";
 
 UltraSonicDistanceSensor distanceSensor(D1, D2);
 boolean pumpStatus = false;
+=======
+
+#include <ESP8266WiFiMulti.h>
+#include <ArduinoJson.h>
+const char* ssid = "JioFarm";
+const char* password = "farmtheland";
+
+boolean pumpStatus = false;
+
+
+ESP8266WiFiMulti WiFiMulti;
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
 WiFiClient wClient;
 
 StaticJsonBuffer<1000> jsonOutputBuffer;
 StaticJsonBuffer<1000> jsonInputBuffer;
 
+<<<<<<< HEAD
 
 String ServerIP = "192.168.225.200";
 String inputBuffer;
@@ -38,6 +57,25 @@ void setup () {
 
 
 
+=======
+String ServerIP = "192.168.225.200";
+String inputBuffer;
+int ServerPort = 3212;
+
+
+void setup () {
+  Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
+  pinMode(D0,OUTPUT);
+  pinMode(D7,OUTPUT);
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP(ssid, password);
+  WiFi.begin(ssid, password);
+  WiFi.setAutoConnect(true);
+  WiFi.setAutoReconnect(true);
+  ArduinoOTA.setHostname("board3");
+  ArduinoOTA.setPassword("thisboardofmine");
+
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -72,12 +110,20 @@ void setup () {
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
+<<<<<<< HEAD
+=======
+  while (WiFiMulti.run() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   Serial.println(WiFi.localIP());
   wClient.connect(ServerIP,ServerPort);
 
 }
 
 int second = 0;
+<<<<<<< HEAD
 float temperature_value;
 void loop () {
   ArduinoOTA.handle();
@@ -92,6 +138,30 @@ void loop () {
   // root["sensor-temperature-1"]=temperature_value;
 
   delay(50);
+=======
+
+void loop () {
+
+  ArduinoOTA.handle();
+  // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
+
+  Serial.print(" Blower is ");
+
+
+  JsonObject &root = jsonOutputBuffer.createObject();
+  root["control-blower"] = int(pumpStatus);
+
+
+  if(pumpStatus)
+  {
+    Serial.println("ON");
+  }
+  else
+  {
+    Serial.println("OFF");
+  }
+
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   if(pumpStatus)
   {
     digitalWrite(D0,HIGH);
@@ -102,12 +172,20 @@ void loop () {
   }
 
 
+<<<<<<< HEAD
   delay(150);
+=======
+
+
+
+  delay(100);
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   while(wClient.available())
   {
     char c = wClient.read();
     if(c=='~')
     {
+<<<<<<< HEAD
       //Serial.println(inputBuffer);
       JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
       if(input_json.success())
@@ -115,6 +193,15 @@ void loop () {
 //        input_json.prettyPrintTo(Serial);
         pumpStatus = input_json["control-blower"];
 //        Serial.println("Updating Pump Status to "+String(pumpStatus));
+=======
+      Serial.println(inputBuffer);
+      JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
+      if(input_json.success())
+      {
+        input_json.prettyPrintTo(Serial);
+        pumpStatus = input_json["control-blower"];
+        Serial.println("Updating Blower Status to "+String(pumpStatus));
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
       }
       else
       {
@@ -129,6 +216,10 @@ void loop () {
     }
 
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   if(!wClient.connected())
   {
     if (! wClient.connect(ServerIP,ServerPort))
@@ -142,7 +233,10 @@ void loop () {
     root.printTo(wClient);
     wClient.print("~");
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> fab7c20cb1bdbf2f940e39b3ed05233106f06b06
   second++;
   jsonOutputBuffer.clear();
 }
