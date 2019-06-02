@@ -81,10 +81,8 @@ void loop () {
     root["control-valve-raft-tank-1"] = int(pumpStatus);
     int distance = 80 - (distanceSensor.measureDistanceCm());
 
-    if(distance < 80)
-    {
-      root["sensor-water-level-buffer-tank-1"] = int(distance);
-    }
+    root["sensor-water-level-buffer-tank-1"] = int(distance);
+
 
     if(pumpStatus)
     {
@@ -96,7 +94,7 @@ void loop () {
     }
 
 
-   delay(1000);
+   delay(100);
    while(wClient.available())
    {
     char c = wClient.read();
