@@ -3,61 +3,36 @@ import json
 from time import sleep
 from threading import Timer
 import datetime
-pump_enable  = True                       # 
+pump_enable  = True                       #
 pump_mode = "Level"
 pump_status = 0
 
 
 blower_status = 0
 blower_enable = False
+blower_on_delay = 1
+blower_off_delay = 1
 
-def pump_on(timer=None):                  # what does timer =None mean??
-    global pump_enable                    # is this definition of pump_enable variable? assignment already happened??
-    global pump_status
-    pump_enable = True
-    pump_status = 1
-    global blower_status
-    while blower_status!=0:
-        pass
-
-    with open("controls.json","r") as fp: # open Jason file in read mode
-        controls = json.load(fp)          # read Jason file contents to  'cont
-
-    print "Pump On"
-    controls['control-pump-main-tank'] = 1 # Set Pump
-
-    with open("controls.json","w") as fp:  # open Jasone file in write mode
-        json.dump(controls,fp,indent = 4)  #  WHAT IS THIS?  write to Jason file? what does json.dump do? what is indent?
-
-    if timer:
-        timer.start()
+def safe_json_read(path):
+    while True:
+        try:
+            with open(path,"r") as fp:
+                data = json.load(fp)
+                return data
+        except:
+            print "Got Error in reading JSON"
+            pass
 
 
-def pump_off(timer=None):
-    global pump_status
-    pump_status = 0                       # WHAT IS THIS? is it needed to clear pump_enable? if not, why was that needed in 'pump_on? 
-    with open("controls.json","r") as fp:
-        controls = json.load(fp)
-
-    print "Pump Off"
-    controls['control-pump-main-tank'] = 0
-
-    with open("controls.json","w") as fp:
-        json.dump(controls,fp,indent = 4)
-
-    if timer:
-        timer.start()                     # start pump off timer
+def mean(array):
+    return int(sum(array)/len(array))
 
 def blower_on(timer=None):
     global blower_enable
     global blower_status
     blower_enable = True
     blower_status = 1
-    global pump_status
-    while pump_status!=0:
-        pass
-    with open("controls.json","r") as fp:
-        controls = json.load(fp)
+    controls = safe_json_read("controls.json")
 
     print "Blower On"
     controls['control-blower'] = 1
@@ -72,8 +47,7 @@ def blower_on(timer=None):
 def blower_off(timer=None):
     global blower_status
     blower_status = 0
-    with open("controls.json","r") as fp:
-        controls = json.load(fp)
+    controls = safe_json_read("controls.json")
 
     print "Blower Off"
     controls['control-blower'] = 0
@@ -84,10 +58,48 @@ def blower_off(timer=None):
     if timer:
         timer.start()
 
+
+def pump_on(timer=None):                  # what does timer =None mean??
+    global pump_enable                    # is this definition of pump_enable variable? assignment already happened??
+    global pump_status
+    pump_enable = True
+    pump_status = 1
+
+    with open("controls.json","r") as fp: # open Jason file in read mode
+        controls = json.load(fp)          # read Jason file contents to  'cont
+
+    print "Pump On"
+    controls['control-pump-main-tank'] = 1 # Set Pump
+
+    with open("controls.json","w") as fp:  # open Jasone file in write mode
+        json.dump(controls,fp,indent = 4)  #  WHAT IS THIS?  write to Jason file? what does json.dump do? what is indent?
+
+    if timer:
+        timer.start()
+
+    Timer(blower_on_delay,blower_on).start()
+
+def pump_off(timer=None):
+    global pump_status
+    pump_status = 0                       # WHAT IS THIS? is it needed to clear pump_enable? if not, why was that needed in 'pump_on?
+    controls = safe_json_read("controls.json")
+
+    print "Pump Off"
+    controls['control-pump-main-tank'] = 0
+
+    with open("controls.json","w") as fp:
+        json.dump(controls,fp,indent = 4)
+
+    if timer:
+        timer.start()                     # start pump off timer
+
+    Timer(blower_off_delay,blower_off).start()
+
+
+
 def close_valves():
 
-    with open("controls.json","r") as fp:
-        controls = json.load(fp)
+    controls = safe_json_read("controls.json")
 
     print "Valves Closed"
     controls["control-valve-raft-tank-1"] = 1
@@ -98,8 +110,7 @@ def close_valves():
 
 def open_valves():
 
-    with open("controls.json","r") as fp:
-        controls = json.load(fp)
+    controls = safe_json_read("controls.json")
 
     print "Valves Opened"
     controls["control-valve-raft-tank-1"] = 0
@@ -112,17 +123,43 @@ def enable_pump():
     global pump_enable
     pump_enable = True
 
+tank_1_levels = []
+tank_2_levels = []
+
 def get_water_level(sensors,mode = "avg"):
+
     if mode=="avg":
+        # TODO: Implement value checking and buffering
         return int((sensors['sensor-water-level-buffer-tank-2']+sensors['sensor-water-level-buffer-tank-1'])/2)
     elif mode=="min":
+        # TODO: Implement value checking and buffering
         return min(sensors['sensor-water-level-buffer-tank-2'],sensors['sensor-water-level-buffer-tank-1'])
     elif mode=="max":
+            # TODO: Implement value checking and buffering
             return max(sensors['sensor-water-level-buffer-tank-2'],sensors['sensor-water-level-buffer-tank-1'])
     elif mode=="first":
-	return sensors['sensor-water-level-buffer-tank-1']
+        if sensors['sensor-water-level-buffer-tank-1'] < 76:
+            tank_1_levels.append(sensors['sensor-water-level-buffer-tank-1'])
+
+        if len(tank_1_levels)>3:
+            del tank_1_levels[0]
+
+        if len(tank_1_levels)>0:
+        	return mean(tank_1_levels)
+        else:
+            return 25
+
     elif mode=="second":
-        return sensors['sensor-water-level-buffer-tank-2']
+        if sensors['sensor-water-level-buffer-tank-2'] < 76:
+            tank_2_levels.append(sensors['sensor-water-level-buffer-tank-2'])
+        if len(tank_2_levels)>3:
+            del tank_2_levels[0]
+
+        if len(tank_2_levels)>0:
+        	return mean(tank_2_levels)
+        else:
+            return 25
+
     else:
         raise RuntimeError("Unknown mode for get water level")
 
@@ -169,13 +206,13 @@ while True:
             pump_enable = False
 
 
-        blower_on_time = 4
-        blower_off_time = 8
-        if blower_enable:
-            timer_on = Timer(blower_off_time,blower_on)
-            timer_off = Timer(blower_on_time,blower_off,[timer_on,])
-            timer_off.start()
-            blower_enable = False
+        # blower_on_time = 4
+        # blower_off_time = 8
+        # if blower_enable:
+        #     timer_on = Timer(blower_off_time,blower_on)
+        #     timer_off = Timer(blower_on_time,blower_off,[timer_on,])
+        #     timer_off.start()
+        #     blower_enable = False
 
         if pump_enable and pump_mode=="Level":
             with open("sensors.json","r") as fp:
