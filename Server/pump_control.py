@@ -19,7 +19,7 @@ def is_night():
     ist = pytz.timezone("Asia/Kolkata")
     x = datetime.datetime.now().replace(tzinfo = ist)
     if x.hour<=8 or x.hour>=16:
-        return True:
+        return True
     else:
         return False
 def safe_json_read(path):

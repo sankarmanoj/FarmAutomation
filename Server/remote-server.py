@@ -36,6 +36,10 @@ class ClientHandler(Thread):
                     control_status["control-pump-main-tank"]=json_data["control-pump-main-tank"]
                     write_back = True
 
+                if "control-blower" in json_data:
+                    control_status["control-blower"]=json_data["control-blower"]
+                    write_back = True
+
 
                 if "control-valve-raft-tank-1" in json_data:
                     control_status["control-valve-raft-tank-1"]=json_data["control-valve-raft-tank-1"]

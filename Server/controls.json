@@ -2,7 +2,7 @@
     "control-valve-raft-tank-1": 1, 
     "control-valve-raft-tank-2": 1, 
     "control-pump-circulation": 0, 
-    "control-blower": 1, 
-    "control-pump-main-tank": 1, 
+    "control-blower": 0, 
+    "control-pump-main-tank": 0, 
     "control-pump-2": 0
 }

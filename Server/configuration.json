@@ -7,5 +7,5 @@
     "time-valve-water-hold" : 10,
     "time-valve-water-drain" : 3,
     "tank-select-water-level" : 0,
-    "hold-time-night-multiplier" : 3,
+    "hold-time-night-multiplier" : 3
 }
