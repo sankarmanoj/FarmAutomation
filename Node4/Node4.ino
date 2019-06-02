@@ -3,14 +3,16 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+
+#include <ESP8266WiFiMulti.h>
 #include <ArduinoJson.h>
-
-
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
 
-UltraSonicDistanceSensor distanceSensor(D1, D2);
 boolean pumpStatus = false;
+
+
+ESP8266WiFiMulti WiFiMulti;
 WiFiClient wClient;
 
 StaticJsonBuffer<1000> jsonOutputBuffer;
@@ -78,20 +80,28 @@ void setup () {
 }
 
 int second = 0;
-float temperature_value;
+
 void loop () {
+
   ArduinoOTA.handle();
+  // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
+
+  Serial.print(" Blower is ");
+
 
   JsonObject &root = jsonOutputBuffer.createObject();
-  // // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
-
   root["control-blower"] = int(pumpStatus);
-  // sensors.requestTemperatures();
 
-//  Serial.println("PumpStatus = "+ String(pumpStatus) + "Temperature = " +String(temperature_value));
-  // root["sensor-temperature-1"]=temperature_value;
 
-  delay(50);
+  if(pumpStatus)
+  {
+    Serial.println("ON");
+  }
+  else
+  {
+    Serial.println("OFF");
+  }
+
   if(pumpStatus)
   {
     digitalWrite(D0,HIGH);
@@ -102,7 +112,6 @@ void loop () {
   }
 
 
-  delay(150);
   while(wClient.available())
   {
     char c = wClient.read();
@@ -142,7 +151,6 @@ void loop () {
     root.printTo(wClient);
     wClient.print("~");
   }
-
   second++;
   jsonOutputBuffer.clear();
 }
