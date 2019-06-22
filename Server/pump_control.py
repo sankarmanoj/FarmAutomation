@@ -16,7 +16,7 @@ pump_status = 0
 blower_status = 0
 blower_enable = False
 blower_on_delay = 5
-blower_off_delay = 600
+blower_off_delay = 1800
 
 
 def print_time():
@@ -64,9 +64,11 @@ def blower_off(timer=None):
     blower_status = 0
     controls = safe_json_read("controls.json")
 
-    print "Blower Off",print_time()
-    controls['control-blower'] = 0
-
+    print "Blower Off",print_time(),is_night()
+    if is_night():
+        controls['control-blower'] = 0
+    else:
+        controls['control-blower'] = 1
     with open("controls.json","w") as fp:
         json.dump(controls,fp,indent = 4)
 
@@ -182,6 +184,7 @@ def get_water_level(sensors,mode = "avg"):
         raise RuntimeError("Unknown mode for get water level")
 
 if pump_mode == "Time":                          # WHAT IS THIS?? is this start of main code??
+    blower_on()
     pump_off()
     open_valves()
 elif pump_mode == "Level":
@@ -264,4 +267,4 @@ while True:
                 timer_open_valves.start()
         sleep(0.5)
     except Exception as e:
-        traceback.print_exc()
+        pass #traceback.print_exc()

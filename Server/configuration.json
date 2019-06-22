@@ -4,8 +4,9 @@
     "water-level-buffer-tank-maximum": 37,
     "time-on-pump-main-tank" : 900,
     "time-off-pump-main-tank" : 900 ,
-    "time-valve-water-hold" : 1800,
+    "time-valve-water-hold" : 800,
     "time-valve-water-drain" : 900,
     "tank-select-water-level" : 0,
-    "hold-time-night-multiplier" : 3
+    "hold-time-night-multiplier" : 3,
+    "alert-message" : "BIKE!!!"
 }

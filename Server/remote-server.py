@@ -78,10 +78,12 @@ while True:
     try:
         sensor_status = json.load(open("sensors.json","r"))
         control_status =  json.load(open("controls.json","r"))
+	configuration = json.load(open("configuration.json","r"))
         # print "On Server ",sensor_status
         # print "On Server ",control_status
         all_data = sensor_status.copy()
         all_data.update(control_status)
+	all_data["alert-message"]=configuration["alert-message"]
         for client in clients:
             try:
                 client.send_data(all_data)
