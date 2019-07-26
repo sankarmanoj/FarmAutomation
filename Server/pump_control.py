@@ -145,21 +145,42 @@ def set_time_pump_enable():
 
 tank_1_levels = []
 tank_2_levels = []
+prev_tank_1_value = None
+prev_tank_2_value = None
 
 def get_water_level(sensors,mode = "avg"):
+    current_tank_1_value = sensors['sensor-water-level-buffer-tank-1']
+    current_tank_2_value = sensors['sensor-water-level-buffer-tank-2']
+    if prev_tank_1_value is not None:
+        if abs(current_tank_1_value - prev_tank_1_value) < 3:
+            effective_tank_1_value = current_tank_1_value
+        else:
+            effective_tank_1_value = prev_tank_1_value
+    else:
+        effective_tank_1_value = current_tank_1_value
+    if prev_tank_2_value is not None:
+        if abs(current_tank_2_value - prev_tank_2_value) < 3:
+            effective_tank_2_value = current_tank_2_value
+        else:
+            effective_tank_2_value = prev_tank_2_value
+    else:
+        effective_tank_2_value = current_tank_2_value
+
+    prev_tank_1_value = current_tank_1_value
+    prev_tank_2_value = current_tank_2_value
 
     if mode=="avg":
         # TODO: Implement value checking and buffering
-        return int((sensors['sensor-water-level-buffer-tank-2']+sensors['sensor-water-level-buffer-tank-1'])/2)
+        return int(effective_tank_1_value+effective_tank_2_value)/2)
     elif mode=="min":
         # TODO: Implement value checking and buffering
-        return min(sensors['sensor-water-level-buffer-tank-2'],sensors['sensor-water-level-buffer-tank-1'])
+        return min(effective_tank_1_value, effective_tank_2_value)
     elif mode=="max":
             # TODO: Implement value checking and buffering
-            return max(sensors['sensor-water-level-buffer-tank-2'],sensors['sensor-water-level-buffer-tank-1'])
+            return max(effective_tank_1_value, effective_tank_2_value)
     elif mode=="first":
-        if sensors['sensor-water-level-buffer-tank-1'] < 76:
-            tank_1_levels.append(sensors['sensor-water-level-buffer-tank-1'])
+        if effective_tank_1_value < 76:
+            tank_1_levels.append(effective_tank_1_value)
 
         if len(tank_1_levels)>3:
             del tank_1_levels[0]
@@ -170,8 +191,8 @@ def get_water_level(sensors,mode = "avg"):
             return 25
 
     elif mode=="second":
-        if sensors['sensor-water-level-buffer-tank-2'] < 76:
-            tank_2_levels.append(sensors['sensor-water-level-buffer-tank-2'])
+        if effective_tank_2_value < 76:
+            tank_2_levels.append(effective_tank_2_value)
         if len(tank_2_levels)>3:
             del tank_2_levels[0]
 
