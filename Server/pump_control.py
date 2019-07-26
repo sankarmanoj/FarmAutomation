@@ -9,7 +9,7 @@ start_time = time()
 
 pump_enable  = True                       #
 time_pump_enable = True
-pump_mode = "Level"
+pump_mode = "Time"
 pump_status = 0
 
 
