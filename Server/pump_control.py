@@ -9,7 +9,7 @@ start_time = time()
 
 pump_enable  = True                       #
 time_pump_enable = True
-pump_mode = "Time"
+pump_mode = "Level"
 pump_status = 0
 
 
@@ -66,7 +66,7 @@ def blower_off(timer=None):
 
     print "Blower Off",print_time(),is_night()
     if is_night():
-        controls['control-blower'] = 0
+        controls['control-blower'] = 1
     else:
         controls['control-blower'] = 1
     with open("controls.json","w") as fp:
