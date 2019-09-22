@@ -1,7 +1,5 @@
 {
     "sensor-water-level-main-tank-2": 0, 
     "sensor-water-level-main-tank-1": 0, 
-    "sensor-water-level-buffer-tank-1": 14, 
-    "sensor-water-level-buffer-tank-2": 8, 
+    "sensor-water-level-buffer-tank-2": -5, 
     "sensor-temperature-1": 0
-}
