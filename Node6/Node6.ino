@@ -19,8 +19,8 @@ String inputBuffer;
 int ServerPort = 3212;
 void setup () {
   Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
+  pinMode(D1,INPUT_PULLUP);
   pinMode(D2,INPUT_PULLUP);
-  pinMode(D3,INPUT_PULLUP);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 //  IPAddress ip(192,168,225,102);   
@@ -79,13 +79,13 @@ void loop () {
 
   JsonObject &root = jsonOutputBuffer.createObject();
 
-  int low_switch_status = digitalRead(D2);
-  int high_switch_status = digitalRead(D3);
-  root["sensor-level-switch-low-tank-1"] = low_switch_status;
-  root["sensor-level-switch-high-tank-1"] = high_switch_status;
+  int low_switch_status = digitalRead(D1);
+  int high_switch_status = digitalRead(D2);
+  root["sensor-level-switch-low-tank-2"] = low_switch_status;
+  root["sensor-level-switch-high-tank-2"] = high_switch_status;
   
   
-  Serial.println("Tank 1 - Switch Status Low = "+String(low_switch_status));
+  Serial.println("Tank 2 - Switch Status Low = "+String(low_switch_status));
   Serial.println("Tank 2 - Switch Status High = "+String(high_switch_status));
   delay(150);
   while(wClient.available())
