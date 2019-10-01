@@ -4,6 +4,23 @@ from time import sleep,time
 from threading import Timer
 import pytz
 import datetime
+import logging
+from logging.handlers import RotatingFileHandler
+
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+logFile = 'events.log'
+
+my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024,
+                                 backupCount=2, encoding=None, delay=0)
+my_handler.setFormatter(log_formatter)
+my_handler.setLevel(logging.INFO)
+
+app_log = logging.getLogger('root')
+app_log.setLevel(logging.INFO)
+
+app_log.addHandler(my_handler)
+
 
 start_time = time()
 
@@ -47,6 +64,8 @@ def blower_on(timer=None):
     global blower_status
     blower_enable = True
     blower_status = 1
+
+    app_log.info("blower_on")
     controls = safe_json_read("controls.json")
 
     print "Blower On",print_time()
@@ -59,12 +78,14 @@ def blower_on(timer=None):
         timer.start()
 
 
+
 def blower_off(timer=None):
     global blower_status
     blower_status = 0
     controls = safe_json_read("controls.json")
 
-    print "Blower Off",print_time(),is_night()
+    app_log.info("blower_off")
+
     if is_night():
         controls['control-blower'] = 1
     else:
@@ -84,7 +105,8 @@ def pump_on(timer=None):                  # what does timer =None mean??
 
     controls = safe_json_read("controls.json")        # read Jason file contents to  'cont
 
-    print "Pump On",print_time()
+    app_log.info("pump_on")
+
     controls['control-pump-main-tank'] = 1 # Set Pump
 
     with open("controls.json","w") as fp:  # open Jasone file in write mode
@@ -100,7 +122,8 @@ def pump_off(timer=None):
     pump_status = 0                       # WHAT IS THIS? is it needed to clear pump_enable? if not, why was that needed in 'pump_on?
     controls = safe_json_read("controls.json")
 
-    print "Pump Off",print_time()
+    app_log.info("pump_on")
+
     controls['control-pump-main-tank'] = 0
 
     with open("controls.json","w") as fp:
@@ -117,7 +140,7 @@ def close_valves():
 
     controls = safe_json_read("controls.json")
 
-    print "Valves Closed",print_time()
+    app_log.info("valves_closed")
     controls["control-valve-raft-tank-1"] = 1
     controls["control-valve-raft-tank-2"] = 1
 
@@ -128,7 +151,7 @@ def open_valves():
 
     controls = safe_json_read("controls.json")
 
-    print "Valves Opened",print_time()
+    app_log.info("valves_opened")
     controls["control-valve-raft-tank-1"] = 0
     controls["control-valve-raft-tank-2"] = 0
 
@@ -187,9 +210,12 @@ if pump_mode == "Time":                          # WHAT IS THIS?? is this start 
     blower_on()
     pump_off()
     open_valves()
-elif pump_mode == "Level":
+elif pump_mode == "Level" or pump_mode=="Switch":
     pump_off()                                   # so, for the first time, pump_enable is not set!! is tha ok?
     open_valves()
+else:
+    raise RuntimeError("Invalid Pump Mode")
+
 
 print_log = True
 while True:
@@ -283,11 +309,13 @@ while True:
                 timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
                 timer_on_pump.start()
                 pump_enable = False
+                app_log.info("Pump Off and Tank Empty. Waiting Drain Time %d"%(water_drain_time))
 
             if pump_status == 1 and sensors["sensor-level-switch-high-tank-2"]==1:
                 pump_off()
                 timer_open_valves = Timer(water_hold_time,open_valves)
                 timer_open_valves.start()
+                app_log.info("Pump On and Tank Full. Holding for %d"%(water_hold_time))
         sleep(0.5)
     except Exception as e:
         pass #traceback.print_exc()
