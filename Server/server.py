@@ -14,7 +14,11 @@ sensor_status = {
     "sensor-water-level-main-tank-1": 0,
     "sensor-water-level-buffer-tank-2": 0,
     "sensor-temperature-1": 0,
-    "sensor-water-level-buffer-tank-1": 0
+    "sensor-water-level-buffer-tank-1": 0,
+    "sensor-level-switch-low-tank-1":0,
+    "sensor-level-switch-high-tank-1":0,
+    "sensor-level-switch-low-tank-2":0,
+    "sensor-level-switch-high-tank-2":0
 }
 control_status =  json.load(open("controls.json","r"))
 def getSensorStatus(in_string):
