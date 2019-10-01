@@ -9,7 +9,7 @@ start_time = time()
 
 pump_enable  = True                       #
 time_pump_enable = True
-pump_mode = "Time"
+pump_mode = "Switch"
 pump_status = 0
 
 
@@ -205,6 +205,14 @@ while True:
                 sensors = json.loads(sensor_string)
                 log_dict['sensor-water-level-buffer-tank-1'] = sensors['sensor-water-level-buffer-tank-1']
                 log_dict['sensor-water-level-buffer-tank-2'] = sensors['sensor-water-level-buffer-tank-2']
+
+                log_dict['sensor-level-switch-low-tank-2'] = sensors['sensor-level-switch-low-tank-2']
+                log_dict['sensor-level-switch-high-tank-2'] = sensors['sensor-level-switch-high-tank-2']
+
+                log_dict['sensor-level-switch-low-tank-1'] = sensors['sensor-level-switch-low-tank-1']
+                log_dict['sensor-level-switch-high-tank-1'] = sensors['sensor-level-switch-high-tank-1']
+
+
             with open("controls.json","r") as fp:
                 controls = json.load(fp)
                 log_dict['control-valve-raft-tank-1'] = controls['control-valve-raft-tank-1']
@@ -262,6 +270,21 @@ while True:
                 pump_enable = False
 
             if pump_status == 1 and get_water_level(sensors,'first')>configuration["water-level-buffer-tank-maximum"]:
+                pump_off()
+                timer_open_valves = Timer(water_hold_time,open_valves)
+                timer_open_valves.start()
+
+        if pump_enable and pump_mode=="Switch":
+            with open("sensors.json","r") as fp:
+                sensor_string = fp.read()
+                sensors = json.loads(sensor_string)
+            if pump_status == 0 and sensors["sensor-level-switch-low-tank-2"]==0:
+                timer_close_valves= Timer(1,close_valves)
+                timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
+                timer_on_pump.start()
+                pump_enable = False
+
+            if pump_status == 1 and sensors["sensor-level-switch-high-tank-2"]==1:
                 pump_off()
                 timer_open_valves = Timer(water_hold_time,open_valves)
                 timer_open_valves.start()
