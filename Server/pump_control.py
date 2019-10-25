@@ -122,7 +122,7 @@ def pump_off(timer=None):
     pump_status = 0                       # WHAT IS THIS? is it needed to clear pump_enable? if not, why was that needed in 'pump_on?
     controls = safe_json_read("controls.json")
 
-    app_log.info("pump_on")
+    app_log.info("pump_off")
 
     controls['control-pump-main-tank'] = 0
 
