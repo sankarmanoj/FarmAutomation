@@ -13,7 +13,7 @@ class CycleState(Enum):
     FILLING = 3
     EMPTYING = 4
 
-current_state = CycleState.EMPTYING
+current_state = CycleState.FILLING
 
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 logFile = 'events.log'
@@ -173,8 +173,8 @@ def open_valves():
 
 server = ServerHandler()
 server.start()
-pump_off()
-open_valves()
+pump_on()
+close_valves()
 
 while True:
     try:

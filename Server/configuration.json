@@ -5,7 +5,7 @@
     "time-on-pump-main-tank" : 600,
     "time-off-pump-main-tank" : 900,
     "time-valve-water-hold" : 1200,
-    "time-valve-water-drain" : 660,
+    "time-valve-water-drain" : 600,
     "tank-select-water-level" : 0,
     "hold-time-night-multiplier" : 1,
     "alert-message" : ""
