@@ -7,10 +7,11 @@ server_socket_port = 3212
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind(("",3212))
 server_socket.listen(10)
+import alert
 
 clients = []
 sensor_status = {
-    "sensor-water-level-main-tank-2": 0, 
+    "sensor-water-level-main-tank-2": 0,
     "sensor-water-level-main-tank-1": 0,
     "sensor-water-level-buffer-tank-2": 0,
     "sensor-temperature-1": 0,
@@ -31,7 +32,7 @@ def getSensorStatus(in_string):
         return
 
     control_echo = {}
-    sensor_echo = {}	
+    sensor_echo = {}
     for val in values.keys():
         if val in sensor_status:
             sensor_status[val] = values[val]
@@ -90,12 +91,17 @@ class ServerHandler(Thread):
             clients_handler.start()
 server = ServerHandler()
 server.start()
+num_clients = 0
+last_alert_sent_time = 0
 while True:
     try:
         sensor_status = json.load(open("sensors.json","r"))
         control_status =  json.load(open("controls.json","r"))
-        # print "On Server ",sensor_status
-        # print "On Server ",control_status
+        if len(clients)==0 and num_clients > 0:
+            numbers = json.load(open("numbers.json","r"))
+            alert.send_sms("Power Lost at the Farm",numbers)
+        num_clients = len(clients)
+
         for client in clients:
             try:
                 client.send_data(control_status)
@@ -104,4 +110,3 @@ while True:
         sleep(1)
     except Exception as e:
         print e
-

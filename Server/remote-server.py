@@ -68,13 +68,13 @@ class ClientHandler(Thread):
                 print json_data
                 write_back = False
                 control_status =  json.load(open("controls.json","r"))
+                
                 if "control-pump-main-tank" in json_data:
                     control_status["control-pump-main-tank"]=json_data["control-pump-main-tank"]
                     if control_status["control-pump-main-tank"]==0:
                         app_log.info("Pump OFF by Remote")
                     else:
                         app_log.info("Pump ON  by Remote")
-
                     write_back = True
 
                 if "control-blower" in json_data:
@@ -83,7 +83,6 @@ class ClientHandler(Thread):
                         app_log.info("Blower OFF by Remote")
                     else:
                         app_log.info("Blower ON  by Remote")
-
                     write_back = True
 
 
