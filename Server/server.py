@@ -1,3 +1,4 @@
+import datetime
 from time import sleep
 import socket
 from threading import Thread
@@ -91,7 +92,8 @@ class ServerHandler(Thread):
             clients_handler.start()
 server = ServerHandler()
 server.start()
-num_clients = 0
+sleep(5)
+num_clients = 1
 last_alert_sent_time = 0
 while True:
     try:
@@ -99,7 +101,7 @@ while True:
         control_status =  json.load(open("controls.json","r"))
         if len(clients)==0 and num_clients > 0:
             numbers = json.load(open("numbers.json","r"))
-            alert.send_sms("Power Lost at the Farm",numbers)
+            alert.send_sms("Power Lost at the Farm at %s"%(str(datetime.datetime.now())),numbers)
         num_clients = len(clients)
 
         for client in clients:
