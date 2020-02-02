@@ -3,7 +3,8 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-
+#define PIN_VALVE_LOW D2
+#define PIN_VALVE_HIGH D7
 
 const char* ssid = "JioFarm";
 const char* password = "farmtheland";
@@ -19,8 +20,9 @@ String inputBuffer;
 int ServerPort = 3212;
 void setup () {
   Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
-  pinMode(D1,INPUT_PULLUP);
-  pinMode(D2,INPUT_PULLUP);
+  pinMode(D6,OUTPUT);
+  pinMode(PIN_VALVE_LOW,INPUT_PULLUP);
+  pinMode(PIN_VALVE_HIGH,INPUT_PULLUP);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 //  IPAddress ip(192,168,225,102);   
@@ -74,17 +76,27 @@ void setup () {
 
 int second = 0;
 float temperature_value;
+boolean valve_status;
 void loop () {
   ArduinoOTA.handle();
 
   JsonObject &root = jsonOutputBuffer.createObject();
 
-  int low_switch_status = digitalRead(D1);
-  int high_switch_status = digitalRead(D2);
+  int low_switch_status = digitalRead(PIN_VALVE_LOW);
+  int high_switch_status = digitalRead(PIN_VALVE_HIGH);
   root["sensor-level-switch-low-tank-2"] = low_switch_status;
   root["sensor-level-switch-high-tank-2"] = high_switch_status;
-  
-  
+  root["control-valve-raft-tank-2"] = int(valve_status);
+
+  if(valve_status)
+  {
+    digitalWrite(D6,HIGH);
+  }
+  else
+  {
+    digitalWrite(D6,LOW);
+  }
+  Serial.println("Tank 2 - Valve = "+String(valve_status));
   Serial.println("Tank 2 - Switch Status Low = "+String(low_switch_status));
   Serial.println("Tank 2 - Switch Status High = "+String(high_switch_status));
   delay(150);
@@ -93,11 +105,11 @@ void loop () {
     char c = wClient.read();
     if(c=='~')
     {
-      //Serial.println(inputBuffer);
+      // Serial.println(inputBuffer);
       JsonObject &input_json = jsonInputBuffer.parse(inputBuffer);
       if(input_json.success())
       {
-
+        valve_status = input_json["control-valve-raft-tank-2"];
       }
       else
       {
