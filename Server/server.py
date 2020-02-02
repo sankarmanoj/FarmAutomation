@@ -20,7 +20,8 @@ sensor_status = {
     "sensor-level-switch-low-tank-1":0,
     "sensor-level-switch-high-tank-1":0,
     "sensor-level-switch-low-tank-2":0,
-    "sensor-level-switch-high-tank-2":0
+    "sensor-level-switch-high-tank-2":0,
+    "number-connected-clients":0
 }
 control_status =  json.load(open("controls.json","r"))
 def getSensorStatus(in_string):
@@ -103,6 +104,7 @@ while True:
             numbers = json.load(open("numbers.json","r"))
             alert.send_sms("Power Lost at the Farm at %s"%(str(datetime.datetime.now())),numbers)
         num_clients = len(clients)
+        sensor_status["number-connected-clients"]=num_clients
 
         for client in clients:
             try:

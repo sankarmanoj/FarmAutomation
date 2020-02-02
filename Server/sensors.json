@@ -1,10 +1,11 @@
 {
+    "sensor-water-level-main-tank-1": 0, 
     "sensor-temperature-1": 0, 
-    "sensor-water-level-buffer-tank-2": -6, 
-    "sensor-water-level-buffer-tank-1": 48, 
+    "sensor-water-level-buffer-tank-2": 77, 
+    "sensor-water-level-buffer-tank-1": 51, 
     "sensor-level-switch-high-tank-2": 1, 
     "sensor-water-level-main-tank-2": 0, 
-    "sensor-water-level-main-tank-1": 0, 
+    "number-connected-clients": 4, 
     "sensor-level-switch-high-tank-1": 0, 
     "sensor-level-switch-low-tank-2": 1, 
     "sensor-level-switch-low-tank-1": 0
