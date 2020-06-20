@@ -1,4 +1,5 @@
 from time import sleep
+import time
 import socket
 from threading import Thread,Timer
 import json
@@ -68,7 +69,7 @@ class ClientHandler(Thread):
                 print json_data
                 write_back = False
                 control_status =  json.load(open("controls.json","r"))
-                
+
                 if "control-pump-main-tank" in json_data:
                     control_status["control-pump-main-tank"]=json_data["control-pump-main-tank"]
                     if control_status["control-pump-main-tank"]==0:
@@ -174,7 +175,8 @@ server = ServerHandler()
 server.start()
 pump_on()
 close_valves()
-
+pump_on_time = time.time()
+pump_off_time = time.time()
 while True:
     try:
         sensor_status = json.load(open("sensors.json","r"))
@@ -182,27 +184,33 @@ while True:
         control_status =  safe_json_read("controls.json")
 
         pump_status = control_status['control-pump-main-tank']
-        pump_on_time = configuration["time-on-pump-main-tank"]       # read pump and hold settings from configuration jsn file
-        pump_off_time = configuration["time-off-pump-main-tank"]
-        water_hold_time = configuration["time-valve-water-hold"]
-        water_drain_time = configuration["time-valve-water-drain"]
+        # pump_on_time = configuration["time-on-pump-main-tank"]       # read pump and hold settings from configuration jsn file
+        # pump_off_time = configuration["time-off-pump-main-tank"]
+        # water_hold_time = configuration["time-valve-water-hold"]
+        # water_drain_time = configuration["time-valve-water-drain"]
 
         print current_state.name
-
-        if pump_status == 0 and sensor_status["sensor-level-switch-low-tank-2"]==0 and current_state==CycleState.EMPTYING:
-            timer_close_valves= Timer(1,close_valves)
-            timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
-            timer_on_pump.start()
-            pump_enable = False
-            app_log.info("Pump Off and Tank Empty. Waiting Drain Time %d"%(water_drain_time))
-            current_state = CycleState.HOLDING_EMPTY
-
-        if pump_status == 1 and sensor_status["sensor-level-switch-high-tank-2"]==1 and current_state==CycleState.FILLING:
+        if pump_status==1 and (time.time()-pump_on_time)>configuration["time-on-pump-main-tank"]:
             pump_off()
-            timer_open_valves = Timer(water_hold_time,open_valves)
-            timer_open_valves.start()
-            app_log.info("Pump On and Tank Full. Holding for %d"%(water_hold_time))
-            current_state = CycleState.HOLDING_FULL
+            pump_off_time = time.time()
+        if pump_status==0 and (time.time()-pump_off_time)>configuration["time-off-pump-maink-tank"]:
+            pump_on()
+            pump_on_time = time.time()
+            
+        # if pump_status == 0 and sensor_status["sensor-level-switch-low-tank-2"]==0 and current_state==CycleState.EMPTYING:
+        #     timer_close_valves= Timer(1,close_valves)
+        #     timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
+        #     timer_on_pump.start()
+        #     pump_enable = False
+        #     app_log.info("Pump Off and Tank Empty. Waiting Drain Time %d"%(water_drain_time))
+        #     current_state = CycleState.HOLDING_EMPTY
+        #
+        # if pump_status == 1 and sensor_status["sensor-level-switch-high-tank-2"]==1 and current_state==CycleState.FILLING:
+        #     pump_off()
+        #     timer_open_valves = Timer(water_hold_time,open_valves)
+        #     timer_open_valves.start()
+        #     app_log.info("Pump On and Tank Full. Holding for %d"%(water_hold_time))
+        #     current_state = CycleState.HOLDING_FULL
 
         control_status =  json.load(open("controls.json","r"))
 
