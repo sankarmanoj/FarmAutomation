@@ -6,7 +6,7 @@ import json
 import logging
 from logging.handlers import RotatingFileHandler
 from enum import Enum
-
+import traceback
 
 class CycleState(Enum):
     HOLDING_FULL = 1
@@ -189,14 +189,15 @@ while True:
         # water_hold_time = configuration["time-valve-water-hold"]
         # water_drain_time = configuration["time-valve-water-drain"]
 
-        print current_state.name
+        print current_state.name,pump_status,time.time()-pump_on_time,time.time()-pump_off_time
         if pump_status==1 and (time.time()-pump_on_time)>configuration["time-on-pump-main-tank"]:
             pump_off()
             pump_off_time = time.time()
-        if pump_status==0 and (time.time()-pump_off_time)>configuration["time-off-pump-maink-tank"]:
+            current_state = CycleState.EMPTYING
+        if pump_status==0 and (time.time()-pump_off_time)>configuration["time-off-pump-main-tank"]:
             pump_on()
             pump_on_time = time.time()
-            
+            current_state = CycleState.FILLING
         # if pump_status == 0 and sensor_status["sensor-level-switch-low-tank-2"]==0 and current_state==CycleState.EMPTYING:
         #     timer_close_valves= Timer(1,close_valves)
         #     timer_on_pump = Timer(water_drain_time,pump_on,[timer_close_valves,])
@@ -225,5 +226,5 @@ while True:
                 clients.remove(client)
 
     except Exception as e:
-        print e
+        print traceback.print_exc()
     sleep(1)
